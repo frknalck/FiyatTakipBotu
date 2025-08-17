@@ -39,7 +39,7 @@ export async function scrapePrice(url) {
     }
     
     try {
-        const price = await scraper.scrapePrice(url);
+        const price = await scraper.scrapeWithStrategy(url);
         return price;
     } catch (error) {
         logger.error(`Failed to scrape price from ${url}: ${error.message}`);
@@ -47,13 +47,7 @@ export async function scrapePrice(url) {
     }
 }
 
-export async function closeAllBrowsers() {
-    const promises = Object.values(scrapers).map(scraper => scraper.closeBrowser());
-    await Promise.all(promises);
-}
-
 export default {
     getScraper,
-    scrapePrice,
-    closeAllBrowsers
+    scrapePrice
 };

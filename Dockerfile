@@ -1,13 +1,8 @@
 FROM node:20-slim
 
-# Minimal Chrome kurulumu
+# Sadece gerekli paketler
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
     ca-certificates \
-    chromium \
-    fonts-liberation \
-    libxss1 \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,10 +15,6 @@ COPY . .
 
 RUN mkdir -p logs data && \
     chown -R node:node /app
-
-# Chromium path
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 USER node
 
