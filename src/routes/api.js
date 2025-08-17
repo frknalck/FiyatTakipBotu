@@ -1,5 +1,5 @@
 import express from 'express';
-import { Product } from '../database/models.js';
+import { Product, Notification } from '../database/models.js';
 import { getScraper } from '../scrapers/index.js';
 import checkAllPrices from '../jobs/priceChecker.js';
 import logger from '../utils/logger.js';
@@ -44,21 +44,8 @@ router.post('/products', async (req, res) => {
             }
         }
         
+        // İlk fiyat kontrolünü atla, hızlı ekleme için
         let initialPrice = null;
-        // İlk fiyat alımını hızlı yapmak için timeout ekle
-        try {
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout')), 10000)
-            );
-            
-            initialPrice = await Promise.race([
-                scraper.scrapePrice(url),
-                timeoutPromise
-            ]);
-        } catch (error) {
-            logger.warn(`Could not fetch initial price for ${url}: ${error.message}`);
-            // İlk fiyat alınamazsa null olarak devam et
-        }
         
         const product = await Product.create({
             name,
@@ -141,6 +128,15 @@ router.post('/check-prices', async (req, res) => {
         logger.error('Error starting manual price check:', error);
         res.status(500).json({ success: false, error: error.message });
     }
+});
+
+router.get('/test', (req, res) => {
+    logger.info('Test endpoint called');
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        message: 'API çalışıyor'
+    });
 });
 
 router.get('/debug', async (req, res) => {

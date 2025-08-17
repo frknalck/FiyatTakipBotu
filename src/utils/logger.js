@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'debug',
     format: winston.format.combine(
         winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss'

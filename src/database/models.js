@@ -1,8 +1,12 @@
 import { runQuery, runStatement, getOne } from './db.js';
+import logger from '../utils/logger.js';
 
 export const Product = {
     async getAll() {
-        return await runQuery('SELECT * FROM products WHERE isActive = 1 ORDER BY createdAt DESC');
+        logger.debug('Getting all active products');
+        const products = await runQuery('SELECT * FROM products WHERE isActive = 1 ORDER BY createdAt DESC');
+        logger.debug(`Found ${products.length} active products`);
+        return products;
     },
 
     async getById(id) {
@@ -14,11 +18,13 @@ export const Product = {
     },
 
     async create(product) {
+        logger.debug(`Creating product: ${product.name} from ${product.site}`);
         const result = await runStatement(
             `INSERT INTO products (name, url, site, threshold, lastPrice) 
              VALUES (?, ?, ?, ?, ?)`,
             [product.name, product.url, product.site, product.threshold, product.lastPrice]
         );
+        logger.debug(`Product created with ID: ${result.lastID}`);
         return await this.getById(result.lastID);
     },
 
