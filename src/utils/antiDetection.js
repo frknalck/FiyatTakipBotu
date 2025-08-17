@@ -15,8 +15,11 @@ export const randomDelay = (min = 1000, max = 3000) => {
 };
 
 export const getBrowserConfig = () => {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || null;
+    
     return {
         headless: 'new',
+        executablePath,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -26,12 +29,30 @@ export const getBrowserConfig = () => {
             '--no-zygote',
             '--disable-gpu',
             '--disable-blink-features=AutomationControlled',
+            '--disable-features=VizDisplayCompositor',
             '--disable-features=IsolateOrigins,site-per-process',
-            `--window-size=${1920 + Math.floor(Math.random() * 100)},${1080 + Math.floor(Math.random() * 100)}`
+            '--disable-web-security',
+            '--disable-extensions',
+            '--no-default-browser-check',
+            '--disable-background-networking',
+            '--disable-background-timer-throttling',
+            '--disable-renderer-backgrounding',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-client-side-phishing-detection',
+            '--disable-default-apps',
+            '--disable-hang-monitor',
+            '--disable-popup-blocking',
+            '--disable-prompt-on-repost',
+            '--disable-sync',
+            '--metrics-recording-only',
+            '--safebrowsing-disable-auto-update',
+            '--password-store=basic',
+            '--use-mock-keychain',
+            `--window-size=${1366 + Math.floor(Math.random() * 100)},${768 + Math.floor(Math.random() * 100)}`
         ],
         defaultViewport: {
-            width: 1920 + Math.floor(Math.random() * 100),
-            height: 1080 + Math.floor(Math.random() * 100)
+            width: 1366 + Math.floor(Math.random() * 100),
+            height: 768 + Math.floor(Math.random() * 100)
         }
     };
 };

@@ -65,14 +65,25 @@ export class BaseScraper {
             const response = await axios.get(url, {
                 headers: {
                     'User-Agent': userAgent.toString(),
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                     'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
                     'Accept-Encoding': 'gzip, deflate, br',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120"',
+                    'Sec-Ch-Ua-Mobile': '?0',
+                    'Sec-Ch-Ua-Platform': '"Linux"',
+                    'Upgrade-Insecure-Requests': '1',
                     'DNT': '1',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1'
+                    'Connection': 'keep-alive'
                 },
-                timeout: 15000
+                timeout: 20000,
+                maxRedirects: 5,
+                validateStatus: (status) => status < 500
             });
             
             const $ = cheerio.load(response.data);
