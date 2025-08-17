@@ -1,6 +1,7 @@
 import express from 'express';
 import { Product } from '../database/models.js';
 import { getScraper } from '../scrapers/index.js';
+import checkAllPrices from '../jobs/priceChecker.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -95,6 +96,17 @@ router.put('/products/:id', async (req, res) => {
         res.json({ success: true, data: product });
     } catch (error) {
         logger.error('Error updating product:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/check-prices', async (req, res) => {
+    try {
+        logger.info('Manual price check triggered');
+        checkAllPrices(); // Async olarak başlat
+        res.json({ success: true, message: 'Fiyat kontrolü başlatıldı' });
+    } catch (error) {
+        logger.error('Error starting manual price check:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
