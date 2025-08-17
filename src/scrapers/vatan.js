@@ -1,6 +1,6 @@
-import BaseScraper from './baseScraper.js';
+import SimpleAxiosScraper from './simpleAxios.js';
 
-export class VatanScraper extends BaseScraper {
+export class VatanScraper extends SimpleAxiosScraper {
     constructor() {
         super('Vatan');
         this.priceSelectors = [
@@ -9,34 +9,13 @@ export class VatanScraper extends BaseScraper {
             '.product-price .price',
             'span.product-list__price',
             '.product-detail-price-container .price',
-            '.pdp-price'
+            '.pdp-price',
+            '.price'
         ];
     }
 
     async scrapeWithStrategy(url) {
-        for (const selector of this.priceSelectors) {
-            try {
-                const price = await this.scrapeWithPuppeteer(url, selector);
-                if (price !== null && price > 0) {
-                    return price;
-                }
-            } catch (error) {
-                continue;
-            }
-        }
-        
-        for (const selector of this.priceSelectors) {
-            try {
-                const price = await this.scrapeWithAxios(url, selector);
-                if (price !== null && price > 0) {
-                    return price;
-                }
-            } catch (error) {
-                continue;
-            }
-        }
-        
-        throw new Error('Could not find price with any selector');
+        return await this.scrapePrice(url, this.priceSelectors);
     }
 }
 

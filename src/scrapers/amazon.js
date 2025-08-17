@@ -1,6 +1,6 @@
-import BaseScraper from './baseScraper.js';
+import SimpleAxiosScraper from './simpleAxios.js';
 
-export class AmazonScraper extends BaseScraper {
+export class AmazonScraper extends SimpleAxiosScraper {
     constructor() {
         super('Amazon');
         this.priceSelectors = [
@@ -17,18 +17,7 @@ export class AmazonScraper extends BaseScraper {
     }
 
     async scrapeWithStrategy(url) {
-        for (const selector of this.priceSelectors) {
-            try {
-                const price = await this.scrapeWithPuppeteer(url, selector);
-                if (price !== null && price > 0) {
-                    return price;
-                }
-            } catch (error) {
-                continue;
-            }
-        }
-        
-        throw new Error('Could not find price with any selector');
+        return await this.scrapePrice(url, this.priceSelectors);
     }
 }
 
