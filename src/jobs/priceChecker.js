@@ -22,7 +22,7 @@ export async function checkProductPrice(product) {
         
         const previousPrice = product.currentPrice || product.lastPrice;
         
-        Product.updatePrice(product.id, currentPrice);
+        await Product.updatePrice(product.id, currentPrice);
         
         if (previousPrice && previousPrice > currentPrice) {
             const discountPercent = ((previousPrice - currentPrice) / previousPrice) * 100;
@@ -38,7 +38,7 @@ export async function checkProductPrice(product) {
                 );
                 
                 if (notificationSent) {
-                    Notification.add({
+                    await Notification.add({
                         productId: product.id,
                         oldPrice: previousPrice,
                         newPrice: currentPrice,
@@ -60,7 +60,7 @@ export async function checkAllPrices() {
     const startTime = Date.now();
     
     try {
-        const products = Product.getAll().filter(p => p.isActive);
+        const products = (await Product.getAll()).filter(p => p.isActive);
         logger.info(`Found ${products.length} active products to check`);
         
         if (products.length === 0) {

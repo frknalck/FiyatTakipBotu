@@ -43,9 +43,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
 
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 COPY . .
 

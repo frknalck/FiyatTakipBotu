@@ -5,9 +5,9 @@ import logger from '../utils/logger.js';
 
 const router = express.Router();
 
-router.get('/products', (req, res) => {
+router.get('/products', async (req, res) => {
     try {
-        const products = Product.getAll();
+        const products = await Product.getAll();
         res.json({ success: true, data: products });
     } catch (error) {
         logger.error('Error fetching products:', error);
@@ -50,7 +50,7 @@ router.post('/products', async (req, res) => {
             logger.warn(`Could not fetch initial price for ${url}: ${error.message}`);
         }
         
-        const product = Product.create({
+        const product = await Product.create({
             name,
             url,
             site,
@@ -65,10 +65,10 @@ router.post('/products', async (req, res) => {
     }
 });
 
-router.patch('/products/:id/toggle', (req, res) => {
+router.patch('/products/:id/toggle', async (req, res) => {
     try {
         const { id } = req.params;
-        Product.toggleActive(parseInt(id));
+        await Product.toggleActive(parseInt(id));
         res.json({ success: true });
     } catch (error) {
         logger.error('Error toggling product:', error);
@@ -76,10 +76,10 @@ router.patch('/products/:id/toggle', (req, res) => {
     }
 });
 
-router.delete('/products/:id', (req, res) => {
+router.delete('/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        Product.delete(parseInt(id));
+        await Product.delete(parseInt(id));
         res.json({ success: true });
     } catch (error) {
         logger.error('Error deleting product:', error);
@@ -87,11 +87,11 @@ router.delete('/products/:id', (req, res) => {
     }
 });
 
-router.put('/products/:id', (req, res) => {
+router.put('/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-        const product = Product.update(parseInt(id), updates);
+        const product = await Product.update(parseInt(id), updates);
         res.json({ success: true, data: product });
     } catch (error) {
         logger.error('Error updating product:', error);

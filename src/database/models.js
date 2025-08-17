@@ -1,98 +1,116 @@
-import db from './db.js';
+import { runQuery, runStatement, getOne } from './db.js';
 
 export const Product = {
-    getAll() {
-        return db.prepare('SELECT * FROM products WHERE isActive = 1 ORDER BY createdAt DESC').all();
+    async getAll() {
+        return await runQuery('SELECT * FROM products WHERE isActive = 1 ORDER BY createdAt DESC');
     },
 
-    getById(id) {
-        return db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+    async getById(id) {
+        return await getOne('SELECT * FROM products WHERE id = ?', [id]);
     },
 
-    getBySite(site) {
-        return db.prepare('SELECT * FROM products WHERE site = ? AND isActive = 1').all(site);
+    async getBySite(site) {
+        return await runQuery('SELECT * FROM products WHERE site = ? AND isActive = 1', [site]);
     },
 
-    create(product) {
-        const stmt = db.prepare(`
-            INSERT INTO products (name, url, site, threshold, lastPrice) 
-            VALUES (@name, @url, @site, @threshold, @lastPrice)
-        `);
-        const info = stmt.run(product);
-        return this.getById(info.lastInsertRowid);
+    async create(product) {
+        const result = await runStatement(
+            `INSERT INTO products (name, url, site, threshold, lastPrice) 
+             VALUES (?, ?, ?, ?, ?)`,
+            [product.name, product.url, product.site, product.threshold, product.lastPrice]
+        );
+        return await this.getById(result.lastID);
     },
 
-    update(id, updates) {
-        const fields = Object.keys(updates).map(key => `${key} = @${key}`).join(', ');
-        const stmt = db.prepare(`UPDATE products SET ${fields}, updatedAt = CURRENT_TIMESTAMP WHERE id = @id`);
-        stmt.run({ ...updates, id });
-        return this.getById(id);
+    async update(id, updates) {
+        const fields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
+        const values = Object.values(updates);
+        values.push(id);
+        
+        await runStatement(
+            `UPDATE products SET ${fields}, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
+            values
+        );
+        return await this.getById(id);
     },
 
-    updatePrice(id, price) {
-        const product = this.getById(id);
+    async updatePrice(id, price) {
+        const product = await this.getById(id);
         if (product) {
-            db.prepare(`
-                UPDATE products 
-                SET lastPrice = currentPrice, currentPrice = ?, lastChecked = CURRENT_TIMESTAMP 
-                WHERE id = ?
-            `).run(price, id);
+            await runStatement(
+                `UPDATE products 
+                 SET lastPrice = currentPrice, currentPrice = ?, lastChecked = CURRENT_TIMESTAMP 
+                 WHERE id = ?`,
+                [price, id]
+            );
             
-            PriceHistory.add(id, price);
+            await PriceHistory.add(id, price);
         }
-        return this.getById(id);
+        return await this.getById(id);
     },
 
-    delete(id) {
-        return db.prepare('DELETE FROM products WHERE id = ?').run(id);
+    async delete(id) {
+        return await runStatement('DELETE FROM products WHERE id = ?', [id]);
     },
 
-    toggleActive(id) {
-        const product = this.getById(id);
+    async toggleActive(id) {
+        const product = await this.getById(id);
         if (product) {
-            return db.prepare('UPDATE products SET isActive = ? WHERE id = ?')
-                .run(product.isActive ? 0 : 1, id);
+            return await runStatement(
+                'UPDATE products SET isActive = ? WHERE id = ?',
+                [product.isActive ? 0 : 1, id]
+            );
         }
     }
 };
 
 export const PriceHistory = {
-    add(productId, price) {
-        return db.prepare('INSERT INTO price_history (productId, price) VALUES (?, ?)')
-            .run(productId, price);
+    async add(productId, price) {
+        return await runStatement(
+            'INSERT INTO price_history (productId, price) VALUES (?, ?)',
+            [productId, price]
+        );
     },
 
-    getByProduct(productId, limit = 100) {
-        return db.prepare('SELECT * FROM price_history WHERE productId = ? ORDER BY checkedAt DESC LIMIT ?')
-            .all(productId, limit);
+    async getByProduct(productId, limit = 100) {
+        return await runQuery(
+            'SELECT * FROM price_history WHERE productId = ? ORDER BY checkedAt DESC LIMIT ?',
+            [productId, limit]
+        );
     },
 
-    getLatest(productId) {
-        return db.prepare('SELECT * FROM price_history WHERE productId = ? ORDER BY checkedAt DESC LIMIT 1')
-            .get(productId);
+    async getLatest(productId) {
+        return await getOne(
+            'SELECT * FROM price_history WHERE productId = ? ORDER BY checkedAt DESC LIMIT 1',
+            [productId]
+        );
     }
 };
 
 export const Notification = {
-    add(notification) {
-        return db.prepare(`
-            INSERT INTO notifications (productId, oldPrice, newPrice, discountPercent) 
-            VALUES (@productId, @oldPrice, @newPrice, @discountPercent)
-        `).run(notification);
+    async add(notification) {
+        return await runStatement(
+            `INSERT INTO notifications (productId, oldPrice, newPrice, discountPercent) 
+             VALUES (?, ?, ?, ?)`,
+            [notification.productId, notification.oldPrice, notification.newPrice, notification.discountPercent]
+        );
     },
 
-    getAll(limit = 50) {
-        return db.prepare(`
-            SELECT n.*, p.name, p.url 
-            FROM notifications n 
-            JOIN products p ON n.productId = p.id 
-            ORDER BY n.sentAt DESC 
-            LIMIT ?
-        `).all(limit);
+    async getAll(limit = 50) {
+        return await runQuery(
+            `SELECT n.*, p.name, p.url 
+             FROM notifications n 
+             JOIN products p ON n.productId = p.id 
+             ORDER BY n.sentAt DESC 
+             LIMIT ?`,
+            [limit]
+        );
     },
 
-    getByProduct(productId) {
-        return db.prepare('SELECT * FROM notifications WHERE productId = ? ORDER BY sentAt DESC')
-            .all(productId);
+    async getByProduct(productId) {
+        return await runQuery(
+            'SELECT * FROM notifications WHERE productId = ? ORDER BY sentAt DESC',
+            [productId]
+        );
     }
 };

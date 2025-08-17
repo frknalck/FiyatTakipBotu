@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -13,9 +13,9 @@ if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const db = new Database(dbPath);
+const db = new sqlite3.Database(dbPath);
 
-db.exec(`
+const initQuery = `
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -52,6 +52,35 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_products_active ON products(isActive);
     CREATE INDEX IF NOT EXISTS idx_price_history_product ON price_history(productId);
     CREATE INDEX IF NOT EXISTS idx_notifications_product ON notifications(productId);
-`);
+`;
+
+db.exec(initQuery);
+
+export const runQuery = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+};
+
+export const runStatement = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+            if (err) reject(err);
+            else resolve({ lastID: this.lastID, changes: this.changes });
+        });
+    });
+};
+
+export const getOne = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+    });
+};
 
 export default db;
