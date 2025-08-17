@@ -6,13 +6,17 @@ import basicAuth from 'express-basic-auth';
 import cron from 'node-cron';
 import bodyParser from 'body-parser';
 import ejs from 'ejs';
+
+dotenv.config();
+
+// Database'i ilk başta initialize et
+import './database/db.js';
+
 import logger from './utils/logger.js';
 import { initTelegramBot, sendTestMessage } from './utils/telegram.js';
 import checkAllPrices from './jobs/priceChecker.js';
 import webRoutes from './routes/web.js';
 import apiRoutes from './routes/api.js';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
