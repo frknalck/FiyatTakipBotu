@@ -49,7 +49,8 @@ RUN npm install --omit=dev
 
 COPY . .
 
-RUN mkdir -p logs
+RUN mkdir -p logs data && \
+    chown -R node:node /app
 
 USER node
 
