@@ -1,0 +1,154 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box"></i> Ürün Listesi</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="bi bi-plus-lg"></i> Yeni Ürün Ekle
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <% if (products.length === 0) { %>
+            <p class="text-muted text-center py-5">Henüz ürün eklenmemiş.</p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ürün Adı</th>
+                            <th>Site</th>
+                            <th>Güncel Fiyat</th>
+                            <th>Eşik (%)</th>
+                            <th>Durum</th>
+                            <th>Son Kontrol</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product => { %>
+                            <tr>
+                                <td>#<%= product.id %></td>
+                                <td>
+                                    <a href="<%= product.url %>" target="_blank" class="text-decoration-none">
+                                        <%= product.name %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge badge-site bg-secondary"><%= product.site %></span>
+                                </td>
+                                <td>
+                                    <% if (product.currentPrice) { %>
+                                        ₺<%= product.currentPrice.toFixed(2) %>
+                                    <% } else { %>
+                                        <span class="text-muted">-</span>
+                                    <% } %>
+                                </td>
+                                <td>%<%= product.threshold %></td>
+                                <td>
+                                    <% if (product.isActive) { %>
+                                        <span class="badge bg-success">Aktif</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger">Pasif</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (product.lastChecked) { %>
+                                        <%= new Date(product.lastChecked).toLocaleString('tr-TR') %>
+                                    <% } else { %>
+                                        <span class="text-muted">Henüz kontrol edilmedi</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="toggleProduct(<%= product.id %>)">
+                                        <i class="bi bi-power"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-info" onclick="editProduct(<%= product.id %>)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(<%= product.id %>)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Ürün Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addProductForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ürün Adı</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ürün URL</label>
+                        <input type="url" class="form-control" name="url" required>
+                        <small class="text-muted">Desteklenen siteler: Trendyol, Hepsiburada, Teknosa, Amazon, Vatan, Pasaj, Pazarama, MediaMarkt</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">İndirim Eşiği (%)</label>
+                        <input type="number" class="form-control" name="threshold" value="10" min="1" max="100" required>
+                        <small class="text-muted">Bu orandan fazla indirim olduğunda bildirim gönderilir</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await axios.post('/api/products', data);
+        if (response.data.success) {
+            location.reload();
+        }
+    } catch (error) {
+        alert('Hata: ' + (error.response?.data?.error || 'Bir hata oluştu'));
+    }
+});
+
+async function toggleProduct(id) {
+    try {
+        await axios.patch(`/api/products/${id}/toggle`);
+        location.reload();
+    } catch (error) {
+        alert('Hata: ' + (error.response?.data?.error || 'Bir hata oluştu'));
+    }
+}
+
+async function deleteProduct(id) {
+    if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+        try {
+            await axios.delete(`/api/products/${id}`);
+            location.reload();
+        } catch (error) {
+            alert('Hata: ' + (error.response?.data?.error || 'Bir hata oluştu'));
+        }
+    }
+}
+
+function editProduct(id) {
+    alert('Düzenleme özelliği yakında eklenecek');
+}
+</script>

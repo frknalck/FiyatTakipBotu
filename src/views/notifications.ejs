@@ -1,0 +1,48 @@
+<h2 class="mb-4"><i class="bi bi-bell"></i> Bildirim Geçmişi</h2>
+
+<div class="card">
+    <div class="card-body">
+        <% if (notifications.length === 0) { %>
+            <p class="text-muted text-center py-5">Henüz bildirim gönderilmemiş.</p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ürün</th>
+                            <th>Eski Fiyat</th>
+                            <th>Yeni Fiyat</th>
+                            <th>İndirim</th>
+                            <th>Gönderim Tarihi</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% notifications.forEach(notification => { %>
+                            <tr>
+                                <td>
+                                    <a href="<%= notification.url %>" target="_blank" class="text-decoration-none">
+                                        <%= notification.name %>
+                                    </a>
+                                </td>
+                                <td class="text-muted">₺<%= notification.oldPrice.toFixed(2) %></td>
+                                <td class="price-down fw-bold">₺<%= notification.newPrice.toFixed(2) %></td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-arrow-down"></i> %<%= notification.discountPercent.toFixed(1) %>
+                                    </span>
+                                </td>
+                                <td><%= new Date(notification.sentAt).toLocaleString('tr-TR') %></td>
+                                <td>
+                                    <a href="<%= notification.url %>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-box-arrow-up-right"></i> Ürüne Git
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>

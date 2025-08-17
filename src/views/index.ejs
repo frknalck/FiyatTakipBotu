@@ -1,0 +1,70 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-box"></i> Toplam Ürün</h5>
+                <h2 class="card-text"><%= stats.totalProducts %></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-activity"></i> Aktif Ürün</h5>
+                <h2 class="card-text"><%= stats.activeProducts %></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-bell"></i> Bildirimler</h5>
+                <h2 class="card-text"><%= stats.totalNotifications %></h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-clock-history"></i> Son Bildirimler</h5>
+    </div>
+    <div class="card-body">
+        <% if (recentNotifications.length === 0) { %>
+            <p class="text-muted">Henüz bildirim yok.</p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ürün</th>
+                            <th>Eski Fiyat</th>
+                            <th>Yeni Fiyat</th>
+                            <th>İndirim</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% recentNotifications.forEach(notification => { %>
+                            <tr>
+                                <td>
+                                    <a href="<%= notification.url %>" target="_blank" class="text-decoration-none">
+                                        <%= notification.name %>
+                                    </a>
+                                </td>
+                                <td class="text-muted">₺<%= notification.oldPrice.toFixed(2) %></td>
+                                <td class="price-down fw-bold">₺<%= notification.newPrice.toFixed(2) %></td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-arrow-down"></i> %<%= notification.discountPercent.toFixed(1) %>
+                                    </span>
+                                </td>
+                                <td><%= new Date(notification.sentAt).toLocaleString('tr-TR') %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>

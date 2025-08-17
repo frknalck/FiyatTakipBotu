@@ -1,0 +1,39 @@
+{
+  "name": "fiyat-takip-botu",
+  "version": "1.0.0",
+  "description": "E-ticaret sitelerinden fiyat takip botu",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "migrate": "node src/database/migrate.js",
+    "scraper": "node src/jobs/priceChecker.js"
+  },
+  "keywords": ["price-tracker", "telegram-bot", "e-commerce"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "sqlite3": "^5.1.6",
+    "better-sqlite3": "^9.2.2",
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^21.6.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "user-agents": "^1.1.133",
+    "node-telegram-bot-api": "^0.64.0",
+    "express-basic-auth": "^1.2.1",
+    "ejs": "^3.1.9",
+    "body-parser": "^1.20.2",
+    "p-limit": "^5.0.0",
+    "winston": "^3.11.0",
+    "rotating-file-stream": "^3.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
