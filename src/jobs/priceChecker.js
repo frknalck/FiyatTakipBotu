@@ -56,14 +56,17 @@ export async function checkProductPrice(product) {
 }
 
 export async function checkAllPrices() {
+    console.log('🔄 ===== FIYAT KONTROLÜ BAŞLIYOR =====');
     logger.info('Starting price check job...');
     const startTime = Date.now();
     
     try {
         const products = (await Product.getAll()).filter(p => p.isActive);
+        console.log(`📦 ${products.length} aktif ürün kontrol edilecek`);
         logger.info(`Found ${products.length} active products to check`);
         
         if (products.length === 0) {
+            console.log('❌ Kontrol edilecek aktif ürün yok');
             logger.info('No active products to check');
             return;
         }
@@ -77,6 +80,7 @@ export async function checkAllPrices() {
         });
         
         for (const [site, siteProducts] of Object.entries(siteGroups)) {
+            console.log(`🌐 ${site} sitesinden ${siteProducts.length} ürün kontrol ediliyor`);
             logger.info(`Checking ${siteProducts.length} products from ${site}`);
             
             const checkPromises = siteProducts.map(product => 
@@ -85,10 +89,12 @@ export async function checkAllPrices() {
             
             await Promise.allSettled(checkPromises);
             
+            console.log(`✅ ${site} kontrolü tamamlandı, 3-6 sn bekleniyor...`);
             await randomDelay(3000, 6000);
         }
         
         const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+        console.log(`🎉 ===== FIYAT KONTROLÜ TAMAMLANDI (${duration}s) =====`);
         logger.info(`Price check job completed in ${duration} seconds`);
         
     } catch (error) {

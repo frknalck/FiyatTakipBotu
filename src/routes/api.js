@@ -98,15 +98,18 @@ router.put('/products/:id', async (req, res) => {
 
 router.post('/check-prices', async (req, res) => {
     try {
+        console.log('🔍 MANUEL FIYAT KONTROLÜ BAŞLATILDI');
         logger.info('Manual price check triggered from web interface');
         
         // Aktif ürün sayısını kontrol et
         const products = await Product.getAll();
         const activeProducts = products.filter(p => p.isActive);
         
+        console.log(`📦 ${activeProducts.length} aktif ürün bulundu`);
         logger.info(`Found ${activeProducts.length} active products before check`);
         
         if (activeProducts.length === 0) {
+            console.log('❌ Kontrol edilecek aktif ürün yok');
             return res.json({ 
                 success: false, 
                 message: 'Kontrol edilecek aktif ürün bulunamadı. Önce ürün ekleyin.' 
@@ -114,17 +117,20 @@ router.post('/check-prices', async (req, res) => {
         }
         
         // Async olarak başlat ve hemen yanıt ver
+        console.log('🚀 Fiyat kontrolü başlatılıyor...');
         setImmediate(() => {
             checkAllPrices().catch(error => {
+                console.error('💥 Fiyat kontrolü hatası:', error);
                 logger.error('Price check failed:', error);
             });
         });
         
         res.json({ 
             success: true, 
-            message: `${activeProducts.length} ürün için fiyat kontrolü başlatıldı. Log'ları kontrol edin.` 
+            message: `${activeProducts.length} ürün için fiyat kontrolü başlatıldı. Console log'ları kontrol edin.` 
         });
     } catch (error) {
+        console.error('💥 Fiyat kontrolü API hatası:', error);
         logger.error('Error starting manual price check:', error);
         res.status(500).json({ success: false, error: error.message });
     }

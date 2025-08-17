@@ -87,22 +87,26 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 app.listen(PORT, async () => {
+    console.log(`=== FIYAT TAKIP BOTU BAŞLADI ===`);
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Admin credentials - Username: ${username}, Password: ${password}`);
+    console.log(`Cron schedule: ${cronSchedule}`);
+    
     logger.info(`Server is running on http://localhost:${PORT}`);
     logger.info(`Admin credentials - Username: ${username}, Password: ${password}`);
     
     if (telegramBot) {
         const testResult = await sendTestMessage();
         if (testResult.success) {
+            console.log('✅ Telegram bot connection successful');
             logger.info('Telegram bot connection successful');
         } else {
+            console.log(`❌ Telegram bot connection failed: ${testResult.error}`);
             logger.warn(`Telegram bot connection failed: ${testResult.error}`);
         }
     }
     
-    if (process.env.RUN_ON_STARTUP === 'true') {
-        logger.info('Running initial price check...');
-        setTimeout(() => checkAllPrices(), 10000);
-    }
+    console.log('=== STARTUP COMPLETE ===');
 });
 
 export default app;
