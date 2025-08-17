@@ -1,5 +1,5 @@
 import { Product, Notification } from '../database/models.js';
-import { scrapePrice, closeAllBrowsers } from '../scrapers/index.js';
+import { scrapePrice } from '../scrapers/index.js';
 import { sendNotification } from '../utils/telegram.js';
 import { randomDelay } from '../utils/antiDetection.js';
 import pLimit from 'p-limit';
@@ -105,9 +105,8 @@ export async function checkAllPrices() {
         logger.info(`Price check job completed in ${duration} seconds`);
         
     } catch (error) {
+        console.error('💥 Fiyat kontrolü genel hatası:', error);
         logger.error(`Error in price check job: ${error.message}`);
-    } finally {
-        await closeAllBrowsers();
     }
 }
 
