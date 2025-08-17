@@ -47,6 +47,9 @@ COPY package.json ./
 
 RUN npm install --omit=dev
 
+# Puppeteer Chrome kurulumu
+RUN npx puppeteer browsers install chrome
+
 COPY . .
 
 RUN mkdir -p logs data && \
