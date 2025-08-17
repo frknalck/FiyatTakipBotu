@@ -9,13 +9,20 @@ const limit = pLimit(2);
 
 export async function checkProductPrice(product) {
     try {
+        console.log(`💰 ${product.name} fiyatı kontrol ediliyor...`);
         logger.info(`Checking price for product ${product.id}: ${product.name}`);
+        
+        console.log(`🔗 URL: ${product.url}`);
         
         await randomDelay(2000, 5000);
         
+        console.log(`🕷️ Scraping başlıyor...`);
         const currentPrice = await scrapePrice(product.url);
         
+        console.log(`💸 Bulunan fiyat: ${currentPrice}`);
+        
         if (currentPrice === null || currentPrice <= 0) {
+            console.log(`❌ Geçersiz fiyat: ${currentPrice}`);
             logger.warn(`Invalid price for product ${product.id}: ${currentPrice}`);
             return;
         }
