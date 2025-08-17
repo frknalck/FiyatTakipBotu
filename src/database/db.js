@@ -6,14 +6,23 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../data/data.db');
+const dbPath = process.env.DATABASE_PATH || '/app/data/data.db';
 const dbDir = path.dirname(dbPath);
 
 if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const db = new sqlite3.Database(dbPath);
+let db;
+
+try {
+    console.log(`📂 Creating database at: ${dbPath}`);
+    db = new sqlite3.Database(dbPath);
+    console.log(`✅ Database connected successfully`);
+} catch (error) {
+    console.error(`❌ Database connection failed:`, error);
+    process.exit(1);
+}
 
 const initQuery = `
     CREATE TABLE IF NOT EXISTS products (
@@ -54,7 +63,14 @@ const initQuery = `
     CREATE INDEX IF NOT EXISTS idx_notifications_product ON notifications(productId);
 `;
 
-db.exec(initQuery);
+try {
+    console.log(`🔧 Initializing database tables...`);
+    db.exec(initQuery);
+    console.log(`✅ Database tables created successfully`);
+} catch (error) {
+    console.error(`❌ Database initialization failed:`, error);
+    process.exit(1);
+}
 
 export const runQuery = (sql, params = []) => {
     return new Promise((resolve, reject) => {
