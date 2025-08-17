@@ -6,22 +6,34 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.DATABASE_PATH || '/app/data/data.db';
-const dbDir = path.dirname(dbPath);
-
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-}
+// Production'da memory database kullan, development'da file
+const isProduction = process.env.NODE_ENV === 'production';
+const dbPath = isProduction ? ':memory:' : '/app/data/data.db';
 
 let db;
 
+if (!isProduction) {
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+}
+
 try {
-    console.log(`📂 Creating database at: ${dbPath}`);
+    console.log(`📂 Creating ${isProduction ? 'memory' : 'file'} database at: ${dbPath}`);
     db = new sqlite3.Database(dbPath);
+    
+    // Error handler ekle
+    db.on('error', (err) => {
+        console.error('❌ Database error:', err);
+    });
+    
     console.log(`✅ Database connected successfully`);
 } catch (error) {
     console.error(`❌ Database connection failed:`, error);
-    process.exit(1);
+    // Exit etmesin, memory database dene
+    console.log(`🔄 Trying memory database as fallback...`);
+    db = new sqlite3.Database(':memory:');
 }
 
 const initQuery = `
