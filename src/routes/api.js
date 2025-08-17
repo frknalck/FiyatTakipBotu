@@ -45,10 +45,19 @@ router.post('/products', async (req, res) => {
         }
         
         let initialPrice = null;
+        // İlk fiyat alımını hızlı yapmak için timeout ekle
         try {
-            initialPrice = await scraper.scrapePrice(url);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+            );
+            
+            initialPrice = await Promise.race([
+                scraper.scrapePrice(url),
+                timeoutPromise
+            ]);
         } catch (error) {
             logger.warn(`Could not fetch initial price for ${url}: ${error.message}`);
+            // İlk fiyat alınamazsa null olarak devam et
         }
         
         const product = await Product.create({
@@ -102,12 +111,58 @@ router.put('/products/:id', async (req, res) => {
 
 router.post('/check-prices', async (req, res) => {
     try {
-        logger.info('Manual price check triggered');
-        checkAllPrices(); // Async olarak başlat
-        res.json({ success: true, message: 'Fiyat kontrolü başlatıldı' });
+        logger.info('Manual price check triggered from web interface');
+        
+        // Aktif ürün sayısını kontrol et
+        const products = await Product.getAll();
+        const activeProducts = products.filter(p => p.isActive);
+        
+        logger.info(`Found ${activeProducts.length} active products before check`);
+        
+        if (activeProducts.length === 0) {
+            return res.json({ 
+                success: false, 
+                message: 'Kontrol edilecek aktif ürün bulunamadı. Önce ürün ekleyin.' 
+            });
+        }
+        
+        // Async olarak başlat ve hemen yanıt ver
+        setImmediate(() => {
+            checkAllPrices().catch(error => {
+                logger.error('Price check failed:', error);
+            });
+        });
+        
+        res.json({ 
+            success: true, 
+            message: `${activeProducts.length} ürün için fiyat kontrolü başlatıldı. Log'ları kontrol edin.` 
+        });
     } catch (error) {
         logger.error('Error starting manual price check:', error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.get('/debug', async (req, res) => {
+    try {
+        const products = await Product.getAll();
+        const notifications = await Notification.getAll(5);
+        
+        res.json({
+            totalProducts: products.length,
+            activeProducts: products.filter(p => p.isActive).length,
+            recentNotifications: notifications.length,
+            products: products.map(p => ({
+                id: p.id,
+                name: p.name,
+                site: p.site,
+                isActive: p.isActive,
+                lastChecked: p.lastChecked,
+                currentPrice: p.currentPrice
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 

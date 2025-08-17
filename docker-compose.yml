@@ -17,10 +17,16 @@ services:
       - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}
       - PORT=3000
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - fiyat-takip-data:/app/data
+      - fiyat-takip-logs:/app/logs
     networks:
       - fiyat-takip-network
+
+volumes:
+  fiyat-takip-data:
+    driver: local
+  fiyat-takip-logs:
+    driver: local
 
 networks:
   fiyat-takip-network:
